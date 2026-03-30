@@ -1,0 +1,266 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f172a;
+  --panel: #1e293b;
+  --muted: #94a3b8;
+  --text: #e2e8f0;
+  --accent: #38bdf8;
+  --accent-hover: #0ea5e9;
+  --border: #334155;
+  --danger: #fb7185;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: radial-gradient(circle at top, #1e293b 0, var(--bg) 60%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app-header {
+  padding: 2rem 1.25rem 1rem;
+  text-align: center;
+}
+
+.app-header h1 {
+  margin: 0;
+}
+
+.app-header p {
+  margin-top: 0.4rem;
+  color: var(--muted);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  width: min(1200px, 95vw);
+  margin: 0 auto 1rem;
+}
+
+.tab-button {
+  background: #0b1220;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+}
+
+.tab-button.active {
+  background: var(--accent);
+  color: #002237;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.layout {
+  width: min(1200px, 95vw);
+  margin: 0 auto 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.timeline-layout {
+  grid-template-columns: 1fr;
+}
+
+.panel {
+  background: color-mix(in oklab, var(--panel), black 5%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+.form-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+input,
+select,
+textarea,
+button {
+  background: #0b1220;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  border-color: transparent;
+  background: var(--accent);
+  color: #002237;
+  font-weight: 600;
+}
+
+button:hover {
+  background: var(--accent-hover);
+}
+
+button.danger {
+  background: var(--danger);
+  color: #39040e;
+}
+
+.list {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.list li {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem;
+  background: #0b1220;
+}
+
+.list small {
+  color: var(--muted);
+  display: block;
+  margin-top: 0.3rem;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.timeline-panel {
+  grid-column: 1 / -1;
+}
+
+.timeline-menu {
+  display: grid;
+  gap: 1rem;
+}
+
+.inline-form {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: end;
+}
+
+.timeline-canvas {
+  display: grid;
+  gap: 0.8rem;
+  min-height: 180px;
+}
+
+.timeline-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.6rem;
+}
+
+.timeline-grid {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.timeline-row {
+  display: grid;
+  grid-template-columns: minmax(250px, 320px) 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.timeline-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #0b1220;
+  padding: 0.7rem;
+  cursor: grab;
+}
+
+.timeline-card:active {
+  cursor: grabbing;
+}
+
+.timeline-card-title {
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.timeline-card small {
+  display: block;
+  color: var(--muted);
+}
+
+.timeline-track {
+  position: relative;
+  height: 28px;
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+  background: #111827;
+}
+
+.timeline-line {
+  position: absolute;
+  height: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--accent);
+}
+
+.timeline-dot {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--accent);
+}
+
+.timeline-dot.end {
+  background: #67e8f9;
+}
+
+@media (max-width: 900px) {
+  .inline-form,
+  .timeline-row {
+    grid-template-columns: 1fr;
+  }
+}
