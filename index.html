@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LoreHub — конструктор лора</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>LoreHub</h1>
+      <p>Веб-приложение для развития лора игровых и книжных вселенных.</p>
+    </header>
+
+    <main>
+      <section class="panel" id="documents-panel">
+        <h2>Документы</h2>
+        <form id="document-form" class="stack-form">
+          <label>
+            Название
+            <input type="text" id="doc-title" required />
+          </label>
+          <label>
+            Тип
+            <select id="doc-type" required>
+              <option value="Персонаж">Персонаж</option>
+              <option value="Раса">Раса</option>
+              <option value="Событие">Событие</option>
+              <option value="Локация">Локация</option>
+              <option value="История">История</option>
+              <option value="Другое">Другое</option>
+            </select>
+          </label>
+          <label>
+            Описание
+            <textarea id="doc-description" rows="4" required></textarea>
+          </label>
+          <button type="submit">Добавить документ</button>
+        </form>
+        <ul id="documents-list" class="item-list"></ul>
+      </section>
+
+      <section class="panel" id="relations-panel">
+        <h2>Связи</h2>
+        <form id="relation-form" class="stack-form">
+          <label>
+            Документ A
+            <select id="relation-source" required></select>
+          </label>
+          <label>
+            Тип связи
+            <input
+              type="text"
+              id="relation-type"
+              placeholder="Например: представитель, муж, союзник"
+              required
+            />
+          </label>
+          <label>
+            Документ B
+            <select id="relation-target" required></select>
+          </label>
+          <label>
+            Комментарий
+            <input type="text" id="relation-note" placeholder="опционально" />
+          </label>
+          <button type="submit">Добавить связь</button>
+        </form>
+        <ul id="relations-list" class="item-list"></ul>
+      </section>
+
+      <section class="panel" id="events-panel">
+        <h2>События</h2>
+        <form id="event-form" class="stack-form">
+          <label>
+            Документ
+            <select id="event-document" required></select>
+          </label>
+          <label>
+            Название события
+            <input type="text" id="event-title" required />
+          </label>
+          <label>
+            Описание
+            <textarea id="event-description" rows="3" required></textarea>
+          </label>
+          <label>
+            Начало
+            <input type="datetime-local" id="event-start" required />
+          </label>
+          <label>
+            Завершение (опционально)
+            <input type="datetime-local" id="event-end" />
+          </label>
+          <button type="submit">Добавить событие</button>
+        </form>
+        <ul id="events-list" class="item-list"></ul>
+      </section>
+
+      <section class="panel" id="timeline-panel">
+        <h2>Таймлайн</h2>
+        <div class="timeline-controls">
+          <label>
+            Режим загрузки
+            <select id="timeline-mode">
+              <option value="all">Все события</option>
+              <option value="selected">События выбранных документов</option>
+            </select>
+          </label>
+          <label>
+            Документы для таймлайна
+            <select id="timeline-documents" multiple size="6"></select>
+          </label>
+          <button id="render-timeline" type="button">Показать на шкале</button>
+        </div>
+
+        <div id="timeline-empty" class="empty-state">
+          Добавьте документы и события, чтобы построить временную шкалу.
+        </div>
+        <div id="timeline" class="timeline" hidden></div>
+      </section>
+    </main>
+
+    <template id="item-actions-template">
+      <div class="item-actions">
+        <button class="danger" type="button">Удалить</button>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
