@@ -12,7 +12,12 @@
       <p>Веб-приложение для разработки лора вселенной</p>
     </header>
 
-    <main class="layout">
+    <nav class="tabs" aria-label="Разделы приложения">
+      <button class="tab-button active" data-tab="library" type="button">Документы и события</button>
+      <button class="tab-button" data-tab="timeline" type="button">Таймлайн</button>
+    </nav>
+
+    <main class="layout tab-content active" data-tab-content="library">
       <section class="panel">
         <h2>Документы</h2>
         <form id="document-form" class="form-grid">
@@ -88,21 +93,42 @@
         </form>
         <ul id="events-list" class="list"></ul>
       </section>
+    </main>
 
-      <section class="panel timeline-panel">
-        <h2>Таймлайн</h2>
-        <div class="timeline-controls">
+    <section class="timeline-tab tab-content" data-tab-content="timeline">
+      <section class="panel">
+        <h2>Конструктор таймлайна</h2>
+        <div class="timeline-controls-grid">
           <label>
-            Источник событий
-            <select id="timeline-filter">
-              <option value="all">Все документы</option>
+            Что добавить
+            <select id="timeline-add-mode">
+              <option value="event">Одно событие</option>
+              <option value="document">Все события из документа</option>
             </select>
           </label>
-          <button id="refresh-timeline" type="button">Обновить таймлайн</button>
+          <label>
+            Событие
+            <select id="timeline-event-select"></select>
+          </label>
+          <label>
+            Документ
+            <select id="timeline-document-select"></select>
+          </label>
+          <label>
+            Масштаб шкалы
+            <select id="timeline-scale">
+              <option value="day">День</option>
+              <option value="month">Месяц</option>
+              <option value="year">Год</option>
+            </select>
+          </label>
+          <button id="timeline-add-button" type="button">Добавить на таймлайн</button>
+          <button id="timeline-clear-button" type="button" class="ghost">Очистить таймлайн</button>
         </div>
-        <div id="timeline" class="timeline"></div>
+
+        <div class="timeline-board" id="timeline-board"></div>
       </section>
-    </main>
+    </section>
 
     <template id="empty-state-template">
       <li class="empty">Пока пусто. Добавьте данные через форму выше.</li>
