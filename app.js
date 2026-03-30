@@ -21,6 +21,12 @@ const elements = {
   emptyTemplate: document.getElementById("empty-state-template"),
 };
 
+const SCALE_CONFIG = {
+  day: { unitWidth: 44, maxTicks: 35 },
+  month: { unitWidth: 68, maxTicks: 36 },
+  year: { unitWidth: 96, maxTicks: 40 },
+};
+
 let dragState = {
   draggedId: null,
 };
@@ -31,8 +37,7 @@ renderAll();
 function wireHandlers() {
   elements.tabs.forEach((tabButton) => {
     tabButton.addEventListener("click", () => {
-      const target = tabButton.dataset.tab;
-      switchTab(target);
+      switchTab(tabButton.dataset.tab);
     });
   });
 
@@ -103,9 +108,7 @@ function wireHandlers() {
     renderAll();
   });
 
-  elements.timelineAddMode.addEventListener("change", () => {
-    updateTimelineAddControls();
-  });
+  elements.timelineAddMode.addEventListener("change", updateTimelineAddControls);
 
   elements.timelineScale.addEventListener("change", () => {
     state.timelineScale = elements.timelineScale.value;
@@ -113,9 +116,7 @@ function wireHandlers() {
     renderTimelineBoard();
   });
 
-  elements.timelineAddButton.addEventListener("click", () => {
-    addItemsToTimeline();
-  });
+  elements.timelineAddButton.addEventListener("click", addItemsToTimeline);
 
   elements.timelineClearButton.addEventListener("click", () => {
     state.timelineItems = [];
@@ -239,49 +240,147 @@ function renderEvents() {
 
 function renderTimelineBoard() {
   const timelineEvents = buildTimelineEvents();
-
   if (!timelineEvents.length) {
     elements.timelineBoard.innerHTML = '<div class="empty">На таймлайн пока ничего не добавлено.</div>';
     return;
   }
 
-  const unitRange = getUnitRange(timelineEvents, state.timelineScale);
+  const scale = state.timelineScale;
+  const scaleConfig = SCALE_CONFIG[scale];
+  const unitRange = getUnitRange(timelineEvents, scale);
+  const spanUnits = unitRange.max - unitRange.min;
+  const trackWidth = Math.max(560, (spanUnits + 1) * scaleConfig.unitWidth);
+  const axisTicks = buildAxisTicks(unitRange, scale, scaleConfig.maxTicks);
 
   elements.timelineBoard.innerHTML = `
-    <div class="timeline-grid">
-      <div class="timeline-header">События (перетаскивайте порядок)</div>
-      <div class="timeline-header">Временная шкала · ${scaleLabel(state.timelineScale)}</div>
-      ${timelineEvents
-        .map((item, index) => {
-          const startUnit = toScaleUnit(item.start, state.timelineScale);
-          const endUnit = toScaleUnit(item.end, state.timelineScale);
-          const startPercent = toPercent(startUnit, unitRange.min, unitRange.max);
-          const endPercent = toPercent(endUnit, unitRange.min, unitRange.max);
-          const barWidth = Math.max(endPercent - startPercent, 0);
+    <div class="timeline-layout">
+      <div class="timeline-left-column">
+        <div class="timeline-header">События (перетаскивайте)</div>
+        ${timelineEvents
+          .map(
+            (item, index) => `
+              <div
+                class="timeline-event-card"
+                draggable="true"
+                data-timeline-id="${item.timelineId}"
+                data-row-index="${index}"
+              >
+                <strong>${escapeHtml(item.name)}</strong>
+                <small>${escapeHtml(item.documentTitle)} · ${formatDate(item.start)} → ${formatDate(item.end)}</small>
+              </div>
+            `,
+          )
+          .join("")}
+      </div>
 
-          return `
-            <div
-              class="timeline-event-card"
-              draggable="true"
-              data-timeline-id="${item.timelineId}"
-              data-row-index="${index}"
-            >
-              <strong>${escapeHtml(item.name)}</strong>
-              <small>${escapeHtml(item.documentTitle)} · ${formatDate(item.start)} → ${formatDate(item.end)}</small>
-            </div>
-            <div class="timeline-track-row" data-row-index="${index}">
-              <div class="timeline-track-line"></div>
-              <div class="timeline-point start" style="left:${startPercent}%"></div>
-              <div class="timeline-segment" style="left:${startPercent}%;width:${barWidth}%"></div>
-              <div class="timeline-point end" style="left:${endPercent}%"></div>
-            </div>
-          `;
-        })
-        .join("")}
+      <div class="timeline-right-column">
+        <div class="timeline-scroll-toolbar">
+          <div class="timeline-header">Шкала времени · ${scaleLabel(scale)}</div>
+          <div class="timeline-scroll-actions">
+            <button type="button" class="ghost" id="timeline-pan-left">←</button>
+            <button type="button" class="ghost" id="timeline-pan-right">→</button>
+          </div>
+        </div>
+
+        <div class="timeline-scroll" id="timeline-scroll">
+          <div class="timeline-axis" style="width:${trackWidth}px;">
+            ${axisTicks
+              .map(
+                (tick) => `
+                  <div class="timeline-axis-tick" style="left:${tick.leftPx}px;">
+                    <span>${escapeHtml(tick.label)}</span>
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+
+          <div class="timeline-tracks" style="width:${trackWidth}px;">
+            ${timelineEvents
+              .map((item, index) => {
+                const startUnit = toScaleUnit(item.start, scale);
+                const endUnit = toScaleUnit(item.end, scale);
+                const startPx = toPixel(startUnit, unitRange.min, scaleConfig.unitWidth);
+                const endPx = toPixel(endUnit, unitRange.min, scaleConfig.unitWidth);
+                const safeEndPx = Math.max(endPx, startPx);
+                const segmentWidth = Math.max(2, safeEndPx - startPx);
+
+                return `
+                  <div class="timeline-track-row" data-row-index="${index}">
+                    <div class="timeline-track-line"></div>
+                    <div class="timeline-point start" style="left:${startPx}px"></div>
+                    <div class="timeline-segment" style="left:${startPx}px;width:${segmentWidth}px"></div>
+                    <div class="timeline-point end" style="left:${safeEndPx}px"></div>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        </div>
+      </div>
     </div>
   `;
 
   bindTimelineDragAndDrop();
+  bindTimelinePanControls(scaleConfig.unitWidth);
+}
+
+function bindTimelinePanControls(unitWidth) {
+  const scroller = document.getElementById("timeline-scroll");
+  const leftButton = document.getElementById("timeline-pan-left");
+  const rightButton = document.getElementById("timeline-pan-right");
+
+  if (!scroller || !leftButton || !rightButton) return;
+
+  const shift = unitWidth * 6;
+  leftButton.addEventListener("click", () => {
+    scroller.scrollBy({ left: -shift, behavior: "smooth" });
+  });
+
+  rightButton.addEventListener("click", () => {
+    scroller.scrollBy({ left: shift, behavior: "smooth" });
+  });
+}
+
+function buildAxisTicks(unitRange, scale, maxTicks) {
+  const ticks = [];
+  const totalUnits = unitRange.max - unitRange.min + 1;
+  const step = Math.max(1, Math.ceil(totalUnits / maxTicks));
+
+  for (let unit = unitRange.min; unit <= unitRange.max; unit += step) {
+    ticks.push({
+      unit,
+      leftPx: toPixel(unit, unitRange.min, SCALE_CONFIG[scale].unitWidth),
+      label: formatScaleUnit(unit, scale),
+    });
+  }
+
+  if (ticks.at(-1)?.unit !== unitRange.max) {
+    ticks.push({
+      unit: unitRange.max,
+      leftPx: toPixel(unitRange.max, unitRange.min, SCALE_CONFIG[scale].unitWidth),
+      label: formatScaleUnit(unitRange.max, scale),
+    });
+  }
+
+  return ticks;
+}
+
+function formatScaleUnit(unit, scale) {
+  if (scale === "year") {
+    return String(unit);
+  }
+
+  if (scale === "month") {
+    const year = Math.floor(unit / 12);
+    const monthIndex = unit % 12;
+    const monthDate = new Date(Date.UTC(year, monthIndex, 1));
+    return monthDate.toLocaleDateString("ru-RU", { month: "short", year: "numeric", timeZone: "UTC" });
+  }
+
+  const dateMs = unit * 86400000;
+  const dayDate = new Date(dateMs);
+  return dayDate.toLocaleDateString("ru-RU", { day: "2-digit", month: "short", timeZone: "UTC" });
 }
 
 function addItemsToTimeline() {
@@ -406,19 +505,18 @@ function getUnitRange(items, scale) {
 }
 
 function toScaleUnit(dateValue, scale) {
-  const date = new Date(dateValue);
-  const year = date.getUTCFullYear();
-  const month = date.getUTCMonth();
-  const day = date.getUTCDate();
+  const [yearText, monthText, dayText] = String(dateValue).split("-");
+  const year = Number(yearText);
+  const month = Number(monthText) - 1;
+  const day = Number(dayText);
 
   if (scale === "year") return year;
   if (scale === "month") return year * 12 + month;
   return Math.floor(Date.UTC(year, month, day) / 86400000);
 }
 
-function toPercent(value, min, max) {
-  const normalized = ((value - min) / (max - min)) * 100;
-  return Math.max(0, Math.min(100, normalized));
+function toPixel(unitValue, minUnit, unitWidth) {
+  return (unitValue - minUnit) * unitWidth + unitWidth / 2;
 }
 
 function scaleLabel(scale) {
@@ -464,10 +562,16 @@ function persistState() {
 }
 
 function formatDate(dateValue) {
-  return new Date(dateValue).toLocaleDateString("ru-RU", {
+  const [yearText, monthText, dayText] = String(dateValue).split("-");
+  const year = Number(yearText);
+  const month = Number(monthText) - 1;
+  const day = Number(dayText);
+
+  return new Date(Date.UTC(year, month, day)).toLocaleDateString("ru-RU", {
     year: "numeric",
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
   });
 }
 
