@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LoreHub — конструктор лора</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>LoreHub</h1>
+      <p>Веб-приложение для разработки лора вселенной</p>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <h2>Документы</h2>
+        <form id="document-form" class="form-grid">
+          <label>
+            Название
+            <input name="title" required placeholder="Например: Дом Воронов" />
+          </label>
+          <label>
+            Тип
+            <select name="kind" required>
+              <option value="Персонаж">Персонаж</option>
+              <option value="Раса">Раса</option>
+              <option value="Событие">Событие</option>
+              <option value="Локация">Локация</option>
+              <option value="История">История</option>
+              <option value="Другое">Другое</option>
+            </select>
+          </label>
+          <label class="full">
+            Описание
+            <textarea name="description" rows="4" placeholder="Краткое описание документа"></textarea>
+          </label>
+          <button type="submit">Добавить документ</button>
+        </form>
+
+        <ul id="documents-list" class="list"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>Связи</h2>
+        <form id="relation-form" class="form-grid">
+          <label>
+            Документ A
+            <select name="fromId" required></select>
+          </label>
+          <label>
+            Тип связи
+            <input name="label" required placeholder="например: муж, представитель, союзник" />
+          </label>
+          <label>
+            Документ B
+            <select name="toId" required></select>
+          </label>
+          <button type="submit">Создать связь</button>
+        </form>
+        <ul id="relations-list" class="list"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>События</h2>
+        <form id="event-form" class="form-grid">
+          <label>
+            Документ
+            <select name="documentId" required></select>
+          </label>
+          <label>
+            Название события
+            <input name="name" required placeholder="Коронация" />
+          </label>
+          <label>
+            Начало
+            <input type="date" name="start" required />
+          </label>
+          <label>
+            Завершение (опционально)
+            <input type="date" name="end" />
+          </label>
+          <label class="full">
+            Подробности
+            <textarea name="details" rows="3" placeholder="Что произошло?"></textarea>
+          </label>
+          <button type="submit">Добавить событие</button>
+        </form>
+        <ul id="events-list" class="list"></ul>
+      </section>
+
+      <section class="panel timeline-panel">
+        <h2>Таймлайн</h2>
+        <div class="timeline-controls">
+          <label>
+            Источник событий
+            <select id="timeline-filter">
+              <option value="all">Все документы</option>
+            </select>
+          </label>
+          <button id="refresh-timeline" type="button">Обновить таймлайн</button>
+        </div>
+        <div id="timeline" class="timeline"></div>
+      </section>
+    </main>
+
+    <template id="empty-state-template">
+      <li class="empty">Пока пусто. Добавьте данные через форму выше.</li>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
